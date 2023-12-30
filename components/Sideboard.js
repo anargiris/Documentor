@@ -1,22 +1,18 @@
 "use client";
 import React, { useState } from "react";
 
-const Sideboard = () => {
-  const [sections, setSections] = useState([]);
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import Image from "next/image";
+const Sideboard = ({ handleSectionClick }) => {
+  const [parent] = useAutoAnimate();
+
+  const [sections, setSections] = useState([
+    { title: "New Section", children: [] },
+  ]);
   const [editSection, setEditSection] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({});
-
-  const handleSectionTitleChange = (index, newTitle) => {
-    const newSections = [...sections];
-    newSections[index].title = newTitle;
-    setSections(newSections);
-  };
-
-  const handleChildTitleChange = (parentIndex, childIndex, newTitle) => {
-    const newSections = [...sections];
-    newSections[parentIndex].children[childIndex].title = newTitle;
-    setSections(newSections);
-  };
+  const [expandedSections, setExpandedSections] = useState({
+    0: true,
+  });
 
   const addParentSection = () => {
     const newSection = { title: "New Section", children: [] };
@@ -30,6 +26,18 @@ const Sideboard = () => {
   const addChildSection = (parentIndex) => {
     const newSections = [...sections];
     newSections[parentIndex].children.push({ title: "New Child Section" });
+    setSections(newSections);
+  };
+
+  const handleSectionTitleChange = (index, newTitle) => {
+    const newSections = [...sections];
+    newSections[index].title = newTitle;
+    setSections(newSections);
+  };
+
+  const handleChildTitleChange = (parentIndex, childIndex, newTitle) => {
+    const newSections = [...sections];
+    newSections[parentIndex].children[childIndex].title = newTitle;
     setSections(newSections);
   };
 
@@ -54,84 +62,108 @@ const Sideboard = () => {
   };
 
   return (
-    <div className="w-1/4 border-r border-gray-800 p-4 overflow-y-auto">
+    <div
+      ref={parent}
+      className="w-1/4 border-r border-gray-800 px-2 py-4 overflow-y-auto"
+    >
       {sections.map((section, index) => (
-        <div key={index} className="mb-4">
-          {" "}
-          <div className="flex justify-between items-center">
-            {editSection === `parent-${index}` ? (
-              <input
-                type="text"
-                className="border-none outline-none rounded"
-                value={section.title}
-                onChange={(e) =>
-                  handleSectionTitleChange(index, e.target.value)
-                }
-                onBlur={() => setEditSection(null)}
-                autoFocus
-              />
-            ) : (
-              <div
-                onClick={() => setEditSection(`parent-${index}`)}
-                className="cursor-pointer font-semibold"
-              >
-                {section.title}
-              </div>
-            )}{" "}
-            <button
-              onClick={() => toggleSection(index)}
-              className="ml-2 py-1 px-3 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-            >
-              {expandedSections[index] ? "Hide" : "Show"}
-            </button>{" "}
-            <button
-              onClick={() => removeParentSection(index)}
-              className="ml-2 py-1 px-3 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Remove
-            </button>
+        <div ref={parent} key={index} className="mb-4">
+          <div className="flex justify-between items-center group">
+            <div className="flex-1 w-2/3 overflow-hidden flex items-center gap-1">
+              <button onClick={() => toggleSection(index)} className="">
+                {expandedSections[index] ? (
+                  <Image
+                    src="/icons/caret-up-outline.svg"
+                    width={20}
+                    height={20}
+                  />
+                ) : (
+                  <Image
+                    src="/icons/caret-down-outline.svg"
+                    width={20}
+                    height={20}
+                  />
+                )}
+              </button>
+              {editSection === `parent-${index}` ? (
+                <input
+                  type="text"
+                  className="border-none outline-none rounded"
+                  value={section.title}
+                  onChange={(e) =>
+                    handleSectionTitleChange(index, e.target.value)
+                  }
+                  onBlur={() => setEditSection(null)}
+                  autoFocus
+                />
+              ) : (
+                <div
+                  onClick={() => setEditSection(`parent-${index}`)}
+                  className="cursor-pointer font-semibold"
+                >
+                  {section.title}
+                </div>
+              )}
+            </div>
+            <div className=" items-center gap-1 flex">
+              <button onClick={() => removeParentSection(index)}>
+                <Image
+                  src="/icons/remove-circle-outline.svg"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
           </div>
           {expandedSections[index] && (
-            <div className="ml-4">
+            <div ref={parent} className="ml-7">
               {section.children.map((child, childIndex) => (
-                <div key={childIndex} className="mt-2">
-                  {editSection === `child-${index}-${childIndex}` ? (
-                    <input
-                      type="text"
-                      className="border-none outline-none rounded"
-                      value={child.title}
-                      onChange={(e) =>
-                        handleChildTitleChange(
-                          index,
-                          childIndex,
-                          e.target.value
-                        )
-                      }
-                      onBlur={() => setEditSection(null)}
-                      autoFocus
+                <div
+                  key={childIndex}
+                  className="mt-2 flex justify-between items-center"
+                >
+                  <div className="flex-1 overflow-hidden text-sm">
+                    {editSection === `child-${index}-${childIndex}` ? (
+                      <input
+                        type="text"
+                        className="border-none outline-none rounded"
+                        value={child.title}
+                        onChange={(e) =>
+                          handleChildTitleChange(
+                            index,
+                            childIndex,
+                            e.target.value
+                          )
+                        }
+                        onBlur={() => setEditSection(null)}
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        onClick={() => {
+                          setEditSection(`child-${index}-${childIndex}`);
+                          handleSectionClick(`child-${index}-${childIndex}`);
+                        }}
+                        className="cursor-pointer font-medium"
+                      >
+                        {child.title}
+                      </div>
+                    )}
+                  </div>
+                  <button onClick={() => removeChildSection(index, childIndex)}>
+                    <Image
+                      src="/icons/remove-circle-outline.svg"
+                      width={17}
+                      height={17}
                     />
-                  ) : (
-                    <div
-                      onClick={() =>
-                        setEditSection(`child-${index}-${childIndex}`)
-                      }
-                      className="cursor-pointer"
-                    >
-                      {child.title}
-                    </div>
-                  )}{" "}
-                  <button
-                    onClick={() => removeChildSection(index, childIndex)}
-                    className="ml-2 py-1 px-3 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Remove
                   </button>
                 </div>
               ))}
               <button
                 onClick={() => addChildSection(index)}
-                className="mt-2 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="mt-2 py-1 flex items-center gap-2 text-xs text-neutral-700 border-b w-full hover:bg-neutral-100 transition duration-200"
               >
+                <Image src="/icons/add-outline.svg" width={15} height={15} />{" "}
                 Add Child Section
               </button>
             </div>
@@ -140,9 +172,10 @@ const Sideboard = () => {
       ))}
       <button
         onClick={addParentSection}
-        className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600"
+        className="flex items-center gap-2 border-b w-full hover:bg-neutral-100 transition duration-200 py-1"
       >
-        Add Section
+        <Image src="/icons/add-outline.svg" width={20} height={20} /> Add
+        Section
       </button>
     </div>
   );

@@ -8,21 +8,25 @@ import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
 
-const content = "<p>Hello World!</p>";
-
-const Editor = () => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link,
-      Superscript,
-      SubScript,
-      Highlight,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-    ],
-    content,
-  });
+const Editor = ({ content, updateContent }) => {
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit,
+        Underline,
+        Link,
+        Superscript,
+        SubScript,
+        Highlight,
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+      ],
+      content,
+      onUpdate: ({ editor }) => {
+        updateContent(editor.getHTML());
+      },
+    },
+    [content]
+  );
 
   // console.log("content is", editor.getJSON());
   return (
