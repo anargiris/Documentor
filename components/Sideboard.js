@@ -3,12 +3,9 @@ import React, { useState } from "react";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Image from "next/image";
-const Sideboard = ({ handleSectionClick }) => {
+const Sideboard = ({ handleSectionClick, sections, setSections }) => {
   const [parent] = useAutoAnimate();
 
-  const [sections, setSections] = useState([
-    { title: "New Section", children: [] },
-  ]);
   const [editSection, setEditSection] = useState(null);
   const [expandedSections, setExpandedSections] = useState({
     0: true,
@@ -64,21 +61,23 @@ const Sideboard = ({ handleSectionClick }) => {
   return (
     <div
       ref={parent}
-      className="w-1/4 border-r border-gray-800 px-2 py-4 overflow-y-auto"
+      className="w-1/4 border-r border-gray-300 px-2 py-4 overflow-y-auto"
     >
       {sections.map((section, index) => (
         <div ref={parent} key={index} className="mb-4">
           <div className="flex justify-between items-center group">
-            <div className="flex-1 w-2/3 overflow-hidden flex items-center gap-1">
+            <div className="flex-1 w-2/3 overflow-hidden flex items-center gap-1 break-all">
               <button onClick={() => toggleSection(index)} className="">
-                {expandedSections[index] ? (
+                {!expandedSections[index] ? (
                   <Image
-                    src="/icons/caret-up-outline.svg"
+                    alt="Show section icon"
+                    src="/icons/caret-forward-outline.svg"
                     width={20}
                     height={20}
                   />
                 ) : (
                   <Image
+                    alt="Hide section icon"
                     src="/icons/caret-down-outline.svg"
                     width={20}
                     height={20}
@@ -88,7 +87,7 @@ const Sideboard = ({ handleSectionClick }) => {
               {editSection === `parent-${index}` ? (
                 <input
                   type="text"
-                  className="border-none outline-none rounded"
+                  className="border-none outline-none rounded break-all"
                   value={section.title}
                   onChange={(e) =>
                     handleSectionTitleChange(index, e.target.value)
@@ -99,15 +98,16 @@ const Sideboard = ({ handleSectionClick }) => {
               ) : (
                 <div
                   onClick={() => setEditSection(`parent-${index}`)}
-                  className="cursor-pointer font-semibold"
+                  className="cursor-pointer font-semibold break-words "
                 >
                   {section.title}
                 </div>
               )}
             </div>
-            <div className=" items-center gap-1 flex">
+            <div className="items-center gap-1 flex">
               <button onClick={() => removeParentSection(index)}>
                 <Image
+                  alt="Remove section icon"
                   src="/icons/remove-circle-outline.svg"
                   width={20}
                   height={20}
@@ -152,6 +152,7 @@ const Sideboard = ({ handleSectionClick }) => {
                   </div>
                   <button onClick={() => removeChildSection(index, childIndex)}>
                     <Image
+                      alt="Remove child section icon"
                       src="/icons/remove-circle-outline.svg"
                       width={17}
                       height={17}
@@ -163,7 +164,12 @@ const Sideboard = ({ handleSectionClick }) => {
                 onClick={() => addChildSection(index)}
                 className="mt-2 py-1 flex items-center gap-2 text-xs text-neutral-700 border-b w-full hover:bg-neutral-100 transition duration-200"
               >
-                <Image src="/icons/add-outline.svg" width={15} height={15} />{" "}
+                <Image
+                  alt="Add child section icon"
+                  src="/icons/add-outline.svg"
+                  width={15}
+                  height={15}
+                />
                 Add Child Section
               </button>
             </div>
@@ -174,8 +180,13 @@ const Sideboard = ({ handleSectionClick }) => {
         onClick={addParentSection}
         className="flex items-center gap-2 border-b w-full hover:bg-neutral-100 transition duration-200 py-1"
       >
-        <Image src="/icons/add-outline.svg" width={20} height={20} /> Add
-        Section
+        <Image
+          alt="Add section icon"
+          src="/icons/add-outline.svg"
+          width={20}
+          height={20}
+        />
+        Add Section
       </button>
     </div>
   );

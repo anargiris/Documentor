@@ -7,6 +7,7 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
+import { useEffect } from "react";
 
 const Editor = ({ content, updateContent }) => {
   const editor = useEditor(
@@ -21,16 +22,17 @@ const Editor = ({ content, updateContent }) => {
         TextAlign.configure({ types: ["heading", "paragraph"] }),
       ],
       content,
-      onUpdate: ({ editor }) => {
+      onBlur: ({ editor }) => {
         updateContent(editor.getHTML());
       },
     },
+
     [content]
   );
 
   // console.log("content is", editor.getJSON());
   return (
-    <RichTextEditor className="h-full" editor={editor}>
+    <RichTextEditor className="h-full overflow-y-auto" editor={editor}>
       <RichTextEditor.Toolbar>
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
