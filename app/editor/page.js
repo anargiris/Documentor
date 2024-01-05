@@ -43,7 +43,6 @@ const page = () => {
     // supabaseClient.from('documents').insert([documentData]);
   };
 
-  console.log(content, sections);
   return (
     <div className="flex flex-col h-screen">
       <div className="h-12 border-b border-gray-400 flex items-center px-5">

@@ -13,6 +13,8 @@
     "@mantine/core": "^7.3.2",
     "@mantine/hooks": "^7.3.2",
     "@mantine/tiptap": "^7.3.2",
+    "@supabase/ssr": "^0.0.10",
+    "@supabase/supabase-js": "^2.39.2",
     "@tabler/icons-react": "^2.44.0",
     "@tiptap/extension-highlight": "^2.1.13",
     "@tiptap/extension-link": "^2.1.13",
