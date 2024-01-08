@@ -7,9 +7,6 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
-import { generateHTML } from "@tiptap/react";
-import { useEffect, useState } from "react";
-import RenderedContent from "./RenderedContent";
 
 const Editor = ({ content, updateContent }) => {
   const editor = useEditor(
@@ -87,7 +84,6 @@ const Editor = ({ content, updateContent }) => {
 
         <RichTextEditor.Content />
       </RichTextEditor>
-      <RenderedContent content={content} />
     </>
   );
 };

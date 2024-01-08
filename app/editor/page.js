@@ -1,9 +1,11 @@
 "use client";
 import Editor from "@/components/Editor";
+import RenderedContent from "@/components/RenderedContent";
 import Sideboard from "@/components/Sideboard";
 import React, { useState } from "react";
 
 const page = () => {
+  const [view, setView] = useState("editor");
   const [content, setContent] = useState({}); // Content state
   const [activeSection, setActiveSection] = useState(null); // Active section identifier
   const [sections, setSections] = useState([
@@ -46,6 +48,13 @@ const page = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="h-12 border-b border-gray-400 flex items-center px-5">
+        <div>
+          {view === "editor" ? (
+            <button onClick={() => setView("client")}>Editor View</button>
+          ) : (
+            <button onClick={() => setView("editor")}>Client View</button>
+          )}
+        </div>
         <button onClick={saveDocument} className="ml-auto">
           Save
         </button>
@@ -56,13 +65,18 @@ const page = () => {
           sections={sections}
           setSections={setSections}
         />
-        <div className="py-10 px-4 w-3/4">
-          {/* {activeSection} {content[activeSection]} */}
-          <Editor
-            content={content[activeSection]}
-            updateContent={updateContent}
-          />
-        </div>
+        {activeSection && (
+          <div className="py-2 px-4 w-3/4">
+            {view === "editor" ? (
+              <Editor
+                content={content[activeSection]}
+                updateContent={updateContent}
+              />
+            ) : (
+              <RenderedContent content={content[activeSection]} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
