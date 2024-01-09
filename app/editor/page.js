@@ -2,15 +2,79 @@
 import Editor from "@/components/Editor";
 import RenderedContent from "@/components/RenderedContent";
 import Sideboard from "@/components/Sideboard";
-import React, { useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { data } from "autoprefixer";
+import React, { useEffect, useState } from "react";
 
 const page = () => {
   const [view, setView] = useState("editor");
   const [content, setContent] = useState({}); // Content state
-  const [activeSection, setActiveSection] = useState(null); // Active section identifier
+  const [activeSection, setActiveSection] = useState("child-0-0"); // Active section identifier
   const [sections, setSections] = useState([
-    { title: "New Section", children: [] },
+    { title: "New Section", children: [{ title: "Child section" }] },
   ]);
+
+  const supabase = createClient();
+
+  const deserializeDocument = (data) => {
+    if (!data) {
+      return {
+        sections: [],
+        content: {},
+      };
+    }
+
+    const sections = data.map((section) => {
+      return {
+        id: section.id,
+        title: section.title,
+        children: section.children.map((child) => {
+          return {
+            id: child.id,
+            title: child.title,
+            content: child.content,
+          };
+        }),
+      };
+    });
+
+    const content = {};
+    sections.forEach((section, sectionIndex) => {
+      const sectionContentId = `section-${sectionIndex}`;
+      content[sectionContentId] = section.content || "";
+
+      section.children.forEach((child, childIndex) => {
+        const childContentId = `child-${sectionIndex}-${childIndex}`;
+        content[childContentId] = child.content || "";
+      });
+    });
+
+    return {
+      sections,
+      content,
+    };
+  };
+
+  const getDocuments = async () => {
+    let { data: documents, error } = await supabase
+      .from("documents")
+      .select()
+      .eq("id", 2);
+
+    if (error) return error;
+    console.log("data is", documents);
+    const content = JSON.parse(documents[0].content);
+    console.log("Content is", content);
+    const deserializedData = deserializeDocument(content);
+
+    setSections(deserializedData.sections);
+    setContent(deserializedData.content);
+    return documents;
+  };
+
+  useEffect(() => {
+    getDocuments();
+  }, []);
 
   const handleSectionClick = (sectionId) => {
     setActiveSection(sectionId);
@@ -21,7 +85,10 @@ const page = () => {
   };
 
   const saveDocument = async () => {
-    console.log(sections, content);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const documentData = sections.map((section, sectionIndex) => {
       const sectionContentId = `section-${sectionIndex}`;
       return {
@@ -38,11 +105,22 @@ const page = () => {
         }),
       };
     });
-
+    console.log("user is", user);
     // Here, you would typically serialize `documentData` and send it to your database
     console.log(documentData);
     // Example: Save to Supabase (pseudo-code)
     // supabaseClient.from('documents').insert([documentData]);
+
+    const { data, error } = await supabase
+      .from("documents")
+      .insert([
+        {
+          title: "My first documentation",
+          user_id: user.id,
+          content: JSON.stringify(documentData),
+        },
+      ])
+      .select();
   };
 
   return (

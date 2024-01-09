@@ -11,7 +11,6 @@ export async function middleware(request) {
     // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
     const session = await supabase.auth.getSession();
 
-    console.log(session);
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!
