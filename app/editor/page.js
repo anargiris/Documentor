@@ -1,163 +1,37 @@
-"use client";
-import Editor from "@/components/Editor";
-import RenderedContent from "@/components/RenderedContent";
-import Sideboard from "@/components/Sideboard";
-import { createClient } from "@/utils/supabase/client";
-import { data } from "autoprefixer";
-import React, { useEffect, useState } from "react";
+import EditorClientView from "@/components/EditorClientView";
+import { deserializeDocument } from "@/utils/documents_service";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+const Page = async () => {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
 
-const page = () => {
-  const [view, setView] = useState("editor");
-  const [content, setContent] = useState({}); // Content state
-  const [activeSection, setActiveSection] = useState("child-0-0"); // Active section identifier
-  const [sections, setSections] = useState([
-    { title: "New Section", children: [{ title: "Child section" }] },
-  ]);
+  let { data: documents, error } = await supabase
+    .from("documents")
+    .select()
+    .eq("id", 2);
 
-  const supabase = createClient();
+  if (error)
+    return (
+      <>
+        There was an error:
+        <div className="flex flex-col">
+          <div>{error.message}</div>
+        </div>
+      </>
+    );
+  const content = JSON.parse(documents[0].content);
+  const deserializedData = deserializeDocument(content);
 
-  const deserializeDocument = (data) => {
-    if (!data) {
-      return {
-        sections: [],
-        content: {},
-      };
-    }
-
-    const sections = data.map((section) => {
-      return {
-        id: section.id,
-        title: section.title,
-        children: section.children.map((child) => {
-          return {
-            id: child.id,
-            title: child.title,
-            content: child.content,
-          };
-        }),
-      };
-    });
-
-    const content = {};
-    sections.forEach((section, sectionIndex) => {
-      const sectionContentId = `section-${sectionIndex}`;
-      content[sectionContentId] = section.content || "";
-
-      section.children.forEach((child, childIndex) => {
-        const childContentId = `child-${sectionIndex}-${childIndex}`;
-        content[childContentId] = child.content || "";
-      });
-    });
-
-    return {
-      sections,
-      content,
-    };
-  };
-
-  const getDocuments = async () => {
-    let { data: documents, error } = await supabase
-      .from("documents")
-      .select()
-      .eq("id", 2);
-
-    if (error) return error;
-    console.log("data is", documents);
-    const content = JSON.parse(documents[0].content);
-    console.log("Content is", content);
-    const deserializedData = deserializeDocument(content);
-
-    setSections(deserializedData.sections);
-    setContent(deserializedData.content);
-    return documents;
-  };
-
-  useEffect(() => {
-    getDocuments();
-  }, []);
-
-  const handleSectionClick = (sectionId) => {
-    setActiveSection(sectionId);
-  };
-
-  const updateContent = (newContent) => {
-    setContent({ ...content, [activeSection]: newContent });
-  };
-
-  const saveDocument = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const documentData = sections.map((section, sectionIndex) => {
-      const sectionContentId = `section-${sectionIndex}`;
-      return {
-        id: section.id || sectionContentId, // Assuming each section also has an 'id' field
-        title: section.title,
-        content: content[sectionContentId] || "", // Fallback to empty string if no content
-        children: section.children.map((child, childIndex) => {
-          const childContentId = `child-${sectionIndex}-${childIndex}`;
-          return {
-            id: child.id || childContentId, // Assuming each child also has an 'id' field
-            title: child.title,
-            content: content[childContentId] || "", // Fallback to empty string if no content
-          };
-        }),
-      };
-    });
-    console.log("user is", user);
-    // Here, you would typically serialize `documentData` and send it to your database
-    console.log(documentData);
-    // Example: Save to Supabase (pseudo-code)
-    // supabaseClient.from('documents').insert([documentData]);
-
-    const { data, error } = await supabase
-      .from("documents")
-      .insert([
-        {
-          title: "My first documentation",
-          user_id: user.id,
-          content: JSON.stringify(documentData),
-        },
-      ])
-      .select();
-  };
+  console.log("CHECK DATA HERE", deserializedData);
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="h-12 border-b border-gray-400 flex items-center px-5">
-        <div>
-          {view === "editor" ? (
-            <button onClick={() => setView("client")}>Editor View</button>
-          ) : (
-            <button onClick={() => setView("editor")}>Client View</button>
-          )}
-        </div>
-        <button onClick={saveDocument} className="ml-auto">
-          Save
-        </button>
-      </div>
-      <div className="flex flex-1 overflow-y-auto">
-        <Sideboard
-          handleSectionClick={handleSectionClick}
-          sections={sections}
-          setSections={setSections}
-        />
-        {activeSection && (
-          <div className="py-2 px-4 w-3/4">
-            {view === "editor" ? (
-              <Editor
-                content={content[activeSection]}
-                updateContent={updateContent}
-              />
-            ) : (
-              <RenderedContent content={content[activeSection]} />
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+    <>
+      {deserializedData && (
+        <EditorClientView documentsData={deserializedData} />
+      )}
+    </>
   );
 };
 
-export default page;
+export default Page;

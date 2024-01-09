@@ -3,13 +3,18 @@ import React, { useState } from "react";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Image from "next/image";
+import { expandSectionsOnRender } from "@/utils/documents_service";
+
 const Sideboard = ({ handleSectionClick, sections, setSections }) => {
   const [parent] = useAutoAnimate();
 
   const [editSection, setEditSection] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({
-    0: true,
-  });
+
+  const [expandedSections, setExpandedSections] = useState(
+    expandSectionsOnRender(sections)
+  );
+
+  console.log("EXPANDED SECTIONS ARE", expandedSections);
 
   const addParentSection = () => {
     const newSection = { title: "New Section", children: [] };
