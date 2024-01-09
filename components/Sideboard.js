@@ -5,7 +5,12 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Image from "next/image";
 import { expandSectionsOnRender } from "@/utils/documents_service";
 
-const Sideboard = ({ handleSectionClick, sections, setSections }) => {
+const Sideboard = ({
+  handleSectionClick,
+  sections,
+  setSections,
+  activeSection,
+}) => {
   const [parent] = useAutoAnimate();
 
   const [editSection, setEditSection] = useState(null);
@@ -103,7 +108,11 @@ const Sideboard = ({ handleSectionClick, sections, setSections }) => {
               ) : (
                 <div
                   onClick={() => setEditSection(`parent-${index}`)}
-                  className="cursor-pointer font-semibold break-words "
+                  className={`cursor-pointer font-semibold break-words ${
+                    editSection === `parent-${index}`
+                      ? "text-blue-600"
+                      : "text-gray-900"
+                  }`}
                 >
                   {section.title}
                 </div>
@@ -131,7 +140,11 @@ const Sideboard = ({ handleSectionClick, sections, setSections }) => {
                     {editSection === `child-${index}-${childIndex}` ? (
                       <input
                         type="text"
-                        className="border-none outline-none rounded"
+                        className={`border-none outline-none rounded ${
+                          activeSection === `child-${index}-${childIndex}`
+                            ? "text-blue-500"
+                            : "text-gray-800"
+                        }`}
                         value={child.title}
                         onChange={(e) =>
                           handleChildTitleChange(
@@ -149,7 +162,11 @@ const Sideboard = ({ handleSectionClick, sections, setSections }) => {
                           setEditSection(`child-${index}-${childIndex}`);
                           handleSectionClick(`child-${index}-${childIndex}`);
                         }}
-                        className="cursor-pointer font-medium"
+                        className={`cursor-pointer font-medium ${
+                          activeSection === `child-${index}-${childIndex}`
+                            ? "text-blue-500"
+                            : "text-gray-800"
+                        }`}
                       >
                         {child.title}
                       </div>

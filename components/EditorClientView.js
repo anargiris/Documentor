@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Editor from "@/components/Editor";
 import RenderedContent from "@/components/RenderedContent";
 import Sideboard from "@/components/Sideboard";
+import { createClient } from "@/utils/supabase/client";
 
 const EditorClientView = ({ documentsData }) => {
   const [view, setView] = useState("editor");
@@ -11,6 +12,8 @@ const EditorClientView = ({ documentsData }) => {
   // const [sections, setSections] = useState([
   //   { title: "New Section", children: [{ title: "Child section" }] },
   // ]);
+
+  const supabase = createClient();
 
   const [sections, setSections] = useState(documentsData.sections);
   const handleSectionClick = (sectionId) => {
@@ -80,6 +83,7 @@ const EditorClientView = ({ documentsData }) => {
           handleSectionClick={handleSectionClick}
           sections={sections}
           setSections={setSections}
+          activeSection={activeSection}
         />
         {activeSection && (
           <div className="py-2 px-4 w-3/4">

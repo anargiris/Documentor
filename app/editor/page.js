@@ -20,10 +20,9 @@ const Page = async () => {
         </div>
       </>
     );
+
   const content = JSON.parse(documents[0].content);
   const deserializedData = deserializeDocument(content);
-
-  console.log("CHECK DATA HERE", deserializedData);
 
   return (
     <>
